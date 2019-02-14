@@ -1,0 +1,52 @@
+---
+title: "Practice2"
+author: "Taylor Ledford"
+date: "2/12/2019"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(Rmisc)
+library(plotly)
+
+ads <- read.csv("./Data/Advertising.csv")
+
+summary(ads)
+
+mod <- lm(sales ~ TV, data = ads)
+summary(mod)
+
+g1 <- ggplot(ads, aes(TV, sales)) +
+  geom_point()
+
+g2 <- ggplot(ads, aes(radio, sales)) +
+  geom_point()
+
+g3 <- ggplot(ads, aes(newspaper, sales)) +
+  geom_point()
+
+multiplot(g1, g2, g3)
+
+p <- plot_ly(data = ads, z = ~sales, x = ~TV, y = ~radio, opacity = 0.5) %>%
+  add_markers(marker = list(size = 2))
+
+x <- seq(0.70, 296.40, length = 100)
+y <- seq(0, 49.6, length = 100)
+
+mod2 <- lm(sales ~ TV + radio, data = ads)
+summary(mod2)
+
+plane <- outer(x, y, function(a, b){summary(mod2)$coef[1,1] + summary(mod2)$coef[2,1]*a + summary(mod2)$coef[3,1]*b})
+
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~plane, showscale = TRUE)
+
+mod3 <- lm(sales ~ TV*radio, data = ads)
+
+plane1 <- outer(x, y, function(a, b){summary(mod3)$coef[1,1] + summary(mod3)$coef[2,1]*a + summary(mod3)$coef[3,1]*b + summary(mod3)$coef[4,1]*a*b})
+
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~plane1, showscale = TRUE)
+
+```
